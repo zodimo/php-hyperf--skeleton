@@ -1,0 +1,36 @@
+services:
+  app:
+    build: ./docker/app
+    volumes:
+      - ../:/workspace/:cached
+    ports:
+      - 9501:9501
+    tty: true
+    environment:
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_AUTH:
+    networks:
+      - dev-network
+    depends_on:
+      - cache
+    links:
+      - cache
+    
+  cache:
+    image: redis:latest
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning
+    ports:
+      - 6379:6379
+    volumes:
+      - cache:/data
+    networks:
+      - dev-network
+
+volumes:
+  cache:
+    driver: local
+networks:
+  dev-network:
+    driver: bridge
